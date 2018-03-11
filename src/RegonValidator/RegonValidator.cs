@@ -22,9 +22,6 @@ namespace Rychusoft.Validators
             if (!HasAtLeastThreeUniqueDigits(regon))
                 return false;
 
-            //Making a temporary change in a develop to make sonar analysis successfull
-            var developsTrapForSonar = false;
-
             return true;
         }
 
