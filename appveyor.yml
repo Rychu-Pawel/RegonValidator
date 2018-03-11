@@ -51,7 +51,7 @@ artifacts:
 deploy:
 - provider: NuGet
   api_key:
-    secure: pIocyOj9sIBb9lWvmqzUnMyKDqfqmrJgYm5f3c01Ci+Q34519Jr4C5t79P/2KW3K
+    secure: CvbFl6vNljNYtMkVFtrASle2TyoBc7r3saCiWV7uGv0Eo0T7tFCUvIB5BzlRPqie
   artifact: RegonValidator_nuget_package
   on:
     branch: master
