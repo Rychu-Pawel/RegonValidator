@@ -21,7 +21,10 @@ install:
 - ps: dotnet restore .\RegonValidator.sln
 before_build:
 - ps: >- 
-    if ($env:APPVEYOR_REPO_BRANCH -eq "master") {
+    if ($env:APPVEYOR_REPO_BRANCH -eq "develop") {
+        SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:NipValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.branch.name="develop" /d:sonar.branch.target="master" /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
+    }
+    elseif ($env:APPVEYOR_REPO_BRANCH -eq "master") {
         SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:RegonValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
     }
 build_script:
