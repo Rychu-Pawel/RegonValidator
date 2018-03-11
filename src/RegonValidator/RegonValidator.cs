@@ -10,6 +10,8 @@ namespace Rychusoft.Validators
 
         public static bool IsValid(string regon)
         {
+            var sonarQubeTrap = true;
+
             if (IsEmptyOrNotProperLength(regon))
                 return false;
 
