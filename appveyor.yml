@@ -4,6 +4,8 @@ configuration: Release
 environment:
   SONAR_APIKEY:
     secure: Sq2xEiHxwjrnDA16jDCZco2/xHYxN9x7NCs2y9JsKVKrhC/Zb8OC7McVIaJJFQ3J
+  GITHUB_APIKEY:
+    secure: 7YZqNI0zul2hscDGjbQbvcEcLZHY/10o/c71Wq0ZreeLxj0/hXjZWlIvXpgfOds5
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
@@ -21,11 +23,20 @@ install:
 - ps: dotnet restore .\RegonValidator.sln
 before_build:
 - ps: >- 
-    if ($env:APPVEYOR_REPO_BRANCH -eq "develop") {
-        SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:NipValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.branch.name="develop" /d:sonar.branch.target="master" /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
+    if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+        SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:RegonValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.analysis.mode=preview /d:sonar.github.oauth=$env:GITHUB_APIKEY /d:sonar.github.repository=$env:APPVEYOR_REPO_NAME /d:sonar.github.pullRequest=$env:APPVEYOR_PULL_REQUEST_NUMBER /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
+    }
+    elseif ($env:APPVEYOR_REPO_BRANCH -eq "develop") {
+        SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:RegonValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.branch.name="develop" /d:sonar.branch.target="master" /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
     }
     elseif ($env:APPVEYOR_REPO_BRANCH -eq "master") {
         SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:RegonValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
+    }
+    elseif ($env:APPVEYOR_REPO_BRANCH.StartsWith("release", "CurrentCultureIgnoreCase") -or $env:APPVEYOR_REPO_BRANCH.StartsWith("hotfix", "CurrentCultureIgnoreCase")) {
+        SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:RegonValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.branch.name=$env:APPVEYOR_REPO_BRANCH /d:sonar.branch.target="master" /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
+    }
+    else {
+        SonarQube.Scanner.MSBuild.exe begin /d:sonar.organization="rychu-pawel-github" /k:RegonValidator /d:sonar.login=$env:SONAR_APIKEY /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vstest.reportsPaths="**/*.trx" /d:sonar.branch.name=$env:APPVEYOR_REPO_BRANCH /d:sonar.branch.target="develop" /d:sonar.cs.opencover.reportsPaths=".\Reports\OpenCover.xml"
     }
 build_script:
 - ps: dotnet build .\RegonValidator.sln -c Release
@@ -34,3 +45,8 @@ test_script:
 - ps: OpenCover.Console.exe -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test .\tests\RegonValidatorTests\RegonValidatorTests.csproj --logger:trx --no-build" -filter:"+[RegonValidator*]*" -oldStyle -register:user -output:".\Reports\OpenCover.xml"
 after_test:
 - ps: SonarQube.Scanner.MSBuild.exe end /d:sonar.login=$env:SONAR_APIKEY
+notifications:
+- provider: GitHubPullRequest
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
