@@ -33,6 +33,22 @@ namespace RegonValidatorTests
         }
 
         [Theory]
+        [InlineData("54351420840255")]
+        [InlineData("92632057385954")]
+        [InlineData("10323901843754")]
+        [InlineData("80624880514318")]
+        [InlineData("58945905793760")]
+        [InlineData("38886530059365")]
+        [InlineData("81697011691646")]
+        [InlineData("06008873665180")]
+        [InlineData("14979233540206")]
+        [InlineData("14210866256643")]
+        public void IsValid_InvalidLongRegonsTest(string regon)
+        {
+            Assert.False(RegonValidator.IsValid(regon));
+        }
+
+        [Theory]
         [InlineData("39437971")]
         [InlineData("8784066")]
         [InlineData("709471")]

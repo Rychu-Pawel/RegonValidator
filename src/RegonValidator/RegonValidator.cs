@@ -37,10 +37,29 @@ namespace Rychusoft.Validators
 
         private static bool IsChecksumValid(string regon)
         {
-            char inputRegonChecksum = regon.Length == 9 ? regon[8] : regon[13];
-            int[] weights = regon.Length == 9 ? shortRegonWeights : longRegonWeights;
+            if (regon.Length == 9)
+                return IsShortRegonChecksumValid(regon);
+            else
+                return IsLongRegonChecksumValid(regon);
+        }
 
-            int computedChecksum = CalculateChecksum(regon, weights);
+        private static bool IsShortRegonChecksumValid(string regon)
+        {
+            char inputRegonChecksum = regon[8];
+            int computedChecksum = CalculateChecksum(regon, shortRegonWeights);
+
+            return inputRegonChecksum.ToString() == computedChecksum.ToString();
+        }
+
+        private static bool IsLongRegonChecksumValid(string regon)
+        {
+            var shortSubregon = regon.Substring(0, 9);
+
+            if (!IsShortRegonChecksumValid(shortSubregon))
+                return false;
+
+            char inputRegonChecksum = regon[13];
+            int computedChecksum = CalculateChecksum(regon, longRegonWeights);
 
             return inputRegonChecksum.ToString() == computedChecksum.ToString();
         }
